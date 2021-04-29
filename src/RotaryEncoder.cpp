@@ -76,7 +76,7 @@
 */
 /**************************************************************************/
 RotaryEncoder::RotaryEncoder(uint8_t encoderA, uint8_t encoderB, uint8_t encoderButton)
-{
+{  
   _encoderA      = encoderA;
   _encoderB      = encoderB;
   _encoderButton = encoderButton;
@@ -101,6 +101,11 @@ void RotaryEncoder::begin()
   pinMode(_encoderA,      INPUT_PULLUP); //enable internal pull-up resistors 
   pinMode(_encoderB,      INPUT_PULLUP);
   pinMode(_encoderButton, INPUT_PULLUP);
+  for (size_t i = 0; i < numRotaryEncoders; i++)
+  {
+    _counter[i] = 0;
+  }
+  
 }
 
 /**************************************************************************/
@@ -144,7 +149,7 @@ void RotaryEncoder::readAB()
     case 0b0001: case 0b1110:                                   //CW states, 1 count  per click
   //case 0b0001: case 0b1110: case 0b1000: case 0b0111:         //CW states, 2 counts per click
     #endif
-      _counter++;
+      _counter[_activeCounter]++;
       break;
 
     #if defined(__AVR__)                                        //slow MCU
@@ -154,7 +159,7 @@ void RotaryEncoder::readAB()
     case 0b0100: case 0b1011:                                   //CCW states, 1 count  per click
   //case 0b0100: case 0b1011: case 0b0010: case 0b1101:         //CCW states, 2 counts per click
     #endif
-      _counter--;
+      _counter[_activeCounter]--;
       break;
   }
 
@@ -198,9 +203,9 @@ void RotaryEncoder::readPushButton()
     Return encoder position
 */
 /**************************************************************************/
-int16_t RotaryEncoder::getPosition()
+int16_t RotaryEncoder::getPosition(int8_t activeCounter)
 {
-  return _counter;
+  return _counter[activeCounter];
 }
 
 /**************************************************************************/
@@ -230,9 +235,9 @@ bool RotaryEncoder::getPushButton()
     Manualy sets encoder position
 */
 /**************************************************************************/
-void RotaryEncoder::setPosition(int16_t position)
+void RotaryEncoder::setPosition(int8_t activeCounter, int16_t position)
 {
-  _counter = position;
+  _counter[activeCounter] = position;
 }
 
 /**************************************************************************/
@@ -251,6 +256,10 @@ void RotaryEncoder::setPushButton(bool state)
   _buttonState = !state;
 }
 
+
+void RotaryEncoder::setActiveCounter(uint8_t activeCounter){
+  _activeCounter = activeCounter;
+}
 
 /**************************************************************************/
 /*

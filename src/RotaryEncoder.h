@@ -83,6 +83,9 @@
 #include <avr/pgmspace.h>                  //PROGMEM  support Arduino STM32
 #endif
 
+#ifndef numRotaryEncoders
+#define numRotaryEncoders 2
+#endif
 
 class RotaryEncoder
 {
@@ -93,14 +96,17 @@ class RotaryEncoder
     void     readAB();
     void     readPushButton();
 
-    int16_t  getPosition();
+    int16_t  getPosition(int8_t counter);
     bool     getPushButton();
 
-    void     setPosition(int16_t position);
+    void     setPosition(int8_t counter, int16_t position);
     void     setPushButton(bool state);
+    void     setActiveCounter(uint8_t activeCounter);
 
   protected:
-    volatile int16_t _counter = 0;        //encoder click counter, limit -32768..32767
+
+    volatile int16_t _counter[numRotaryEncoders];        //encoder click counter, limit -32768..32767
+    volatile uint8_t _activeCounter = 0;
 
   private:
     volatile bool    _buttonState = true; //encoder button status, idle value is "true" because internal pull-up resistor is enabled
